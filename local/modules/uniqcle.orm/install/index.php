@@ -1,11 +1,12 @@
 <?php
+
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\ModuleManager;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Application;
 use Bitrix\Main\Entity\Base;
-use \Bitrix\Main\Loader;
-use \Bitrix\Main\EventManager;
+use Bitrix\Main\Loader;
+use Bitrix\Main\EventManager;
 Loc::loadMessages(__FILE__);
 
 class Uniqcle_ORM extends CModule{
@@ -50,8 +51,14 @@ class Uniqcle_ORM extends CModule{
 		global $APPLICATION;
 		ModuleManager::RegisterModule($this->MODULE_ID);
 
-		$this->installFiles();
-		//$this -> installFilesLocal();
+		if (Loader::includeModule($this->MODULE_ID)){
+
+			//$this->installFiles();
+			//$this -> installFilesLocal();
+
+			$this->installDB();
+
+		}
 	}
 
 	function DoUnInstall(){
@@ -64,6 +71,16 @@ class Uniqcle_ORM extends CModule{
 	}
 
 	function installDB(){
+
+		// Создаем таблицу BookTable
+		$connectionName = \Uniqcle\ORM\BookTable::getConnectionName();
+		$instanceDbTable = Base::getInstance("\Uniqcle\ORM\BookTable");
+		$tableName = $instanceDbTable -> getDBTableName();
+
+		if(!Application::getConnection($connectionName)->isTableExists($tableName) ){
+			$instanceDbTable ->createDbTable();
+		}
+
 		return true;
 	}
 
