@@ -53,7 +53,7 @@ class Uniqcle_ORM extends CModule{
 
 		if (Loader::includeModule($this->MODULE_ID)){
 
-			//$this->installFiles();
+			$this->installFiles();
 			//$this -> installFilesLocal();
 
 			$this->installDB();
@@ -66,6 +66,7 @@ class Uniqcle_ORM extends CModule{
 
 		$this->unInstallFiles();
 		//$this->unInstallFilesLocal();
+		$this->unInstallDB();
 
 		ModuleManager::UnRegisterModule($this->MODULE_ID);
 	}
@@ -74,18 +75,41 @@ class Uniqcle_ORM extends CModule{
 
 		// Создаем таблицу BookTable
 		$connectionName = \Uniqcle\ORM\BookTable::getConnectionName();
-		$instanceDbTable = Base::getInstance("\Uniqcle\ORM\BookTable");
-		$tableName = $instanceDbTable -> getDBTableName();
+		$instanceBookTable = Base::getInstance("\Uniqcle\ORM\BookTable");
+		$tableName = $instanceBookTable -> getDBTableName();
 
 		if(!Application::getConnection($connectionName)->isTableExists($tableName) ){
-			$instanceDbTable ->createDbTable();
+			$instanceBookTable ->createDbTable();
+		}
+
+		// Создаем таблицу AuthorTable
+		$connectionName = \Uniqcle\ORM\AuthorTable::getConnectionName();
+		$instanceAuthorTable = Base::getInstance("\Uniqcle\ORM\AuthorTable");
+		$authorName = $instanceAuthorTable-> getDBTableName();
+		if(!Application::getConnection($connectionName)->isTableExists($authorName)){
+			$instanceAuthorTable->createDbTable();
 		}
 
 		return true;
 	}
 
 	function unInstallDB(){
-		return true;
+		Loader::includeModule($this->MODULE_ID);
+
+		$connectionName = \Uniqcle\ORM\BookTable::getConnectionName();
+		$bookInstance = Base::getInstance("Uniqcle\ORM\BookTable");
+		$tableBookName = $bookInstance->getDBTableName();
+
+		Application::getConnection($connectionName)->queryExecute('DROP TABLE IF EXISTS ' . $tableBookName);
+
+
+		$connectionAuthorName = \Uniqcle\ORM\AuthorTable::getConnectionName();
+		$authorInstance = Base::getInstance("Uniqcle\ORM\AuthorTable");
+		$tableAuthorName = $authorInstance->getDBTableName();
+
+		Application::getConnection($connectionAuthorName)->queryExecute('DROP TABLE IF EXISTS ' .$tableAuthorName);
+
+		Option::delete($this->MODULE_ID);
 	}
 
 	function installFiles(){
