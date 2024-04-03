@@ -57,6 +57,7 @@ class Uniqcle_ORM extends CModule{
 			//$this -> installFilesLocal();
 
 			$this->installDB();
+			$this->addData();
 
 		}
 	}
@@ -90,6 +91,14 @@ class Uniqcle_ORM extends CModule{
 			$instanceAuthorTable->createDbTable();
 		}
 
+		// Создаем таблицу DataTable
+		$connectionDataName = \Uniqcle\ORM\DataTable::getConnectionName();
+		$instanceDataTable = Base::getInstance("\Uniqcle\ORM\DataTable");
+		$dataName = $instanceDataTable-> getDBTableName();
+		if(!Application::getConnection($connectionDataName)->isTableExists($dataName)){
+			$instanceDataTable->createDbTable();
+		}
+
 		return true;
 	}
 
@@ -99,18 +108,56 @@ class Uniqcle_ORM extends CModule{
 		$connectionName = \Uniqcle\ORM\BookTable::getConnectionName();
 		$bookInstance = Base::getInstance("Uniqcle\ORM\BookTable");
 		$tableBookName = $bookInstance->getDBTableName();
-
 		Application::getConnection($connectionName)->queryExecute('DROP TABLE IF EXISTS ' . $tableBookName);
 
 
 		$connectionAuthorName = \Uniqcle\ORM\AuthorTable::getConnectionName();
 		$authorInstance = Base::getInstance("Uniqcle\ORM\AuthorTable");
 		$tableAuthorName = $authorInstance->getDBTableName();
-
 		Application::getConnection($connectionAuthorName)->queryExecute('DROP TABLE IF EXISTS ' .$tableAuthorName);
+
+
+		$connectionDataName = \Uniqcle\ORM\DataTable::getConnectionName();
+		$dataInstance = Base::getInstance("Uniqcle\ORM\DataTable");
+		$tableDataName = $dataInstance->getDBTableName();
+		Application::getConnection($connectionDataName)->queryExecute('DROP TABLE IF EXISTS ' .$tableDataName);
 
 		Option::delete($this->MODULE_ID);
 	}
+
+	// заполнение таблиц тестовыми данными
+	function addData()
+	{
+		// подключаем модуль для видимости ORM класса
+		Loader::includeModule($this->MODULE_ID);
+
+		// добавляем запись в таблицу БД
+		\Uniqcle\ORM\DataTable::add(
+			array(
+				"ACTIVE" => "N",
+				"SITE" => '["s1"]',
+				"LINK" => " ",
+				"LINK_PICTURE" => "/bitrix/components/uniqcle.orm/img/banner.jpg",
+				"ALT_PICTURE" => " ",
+				"EXCEPTIONS" => " ",
+				"DATE" => new \Bitrix\Main\Type\DateTime(date("d.m.Y H:i:s")),
+				"TARGET" =>  "self",
+				"AUTHOR_ID" =>  "1",
+			)
+		);
+
+		// добавляем запись в таблицу БД
+		\Uniqcle\ORM\AuthorTable::add(
+			array(
+				"NAME" => "Иван",
+				"LAST_NAME" => "Иванов",
+			)
+		);
+
+		// для успешного завершения, метод должен вернуть true
+		return true;
+	}
+
 
 	function installFiles(){
 		$this->unInstallFiles();

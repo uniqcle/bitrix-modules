@@ -35,6 +35,15 @@ if($APPLICATION->GetGroupRight("uniqcle.orm")>"D"){
 	    // Может принимать остальные значения, как указано сверху
     );
 
+	$aMenu["items"][] =  array(
+		"title" => "Настройки",
+		"text" => "Настройки",
+		"url"  => "uniqcle_data.php?lang=".LANGUAGE_ID,
+		"icon" => "form_menu_icon",
+		"page_icon" => "form_page_icon",
+		// Может принимать остальные значения, как указано сверху
+	);
+
     return $aMenu;
 }
 // если нет доступа, вернем false
